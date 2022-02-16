@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">JetDictionary</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="create_account">CREATE ACCOUNT</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="sign_in">Login</string>
+    <string name="sign_up">Register</string>
+    <string name="feature_not_available">Feature not available</string>
+    <string name="dismiss">DISMISS</string>
+    <string name="back">Back</string>
+    <string name="forgot_password">FORGOT PASSWORD?</string>
+    <string name="register">Do not have an account? Register now.</string>
+</resources>
