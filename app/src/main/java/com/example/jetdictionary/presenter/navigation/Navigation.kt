@@ -114,7 +114,7 @@ fun MainNavHost(
         composable(NavigationDestinations.REGISTER_ROUTER) {
             RegisterScreen(onBack = {
                 navController.navigateUp()
-            })
+            }, registerViewModel = hiltViewModel())
         }
 
     }

@@ -6,54 +6,70 @@ import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.jetdictionary.R
 import com.example.jetdictionary.presenter.base.TextFieldState
 import com.example.jetdictionary.presenter.screen.login.ConfirmPasswordState
 import com.example.jetdictionary.presenter.screen.login.EmailState
 import com.example.jetdictionary.presenter.screen.login.PasswordState
-import com.example.jetdictionary.presenter.view.CustomToolbar
-import com.example.jetdictionary.presenter.view.InputEmail
-import com.example.jetdictionary.presenter.view.InputPassword
-import com.example.jetdictionary.presenter.view.supportWideScreen
+import com.example.jetdictionary.presenter.view.*
 import com.example.jetdictionary.ui.theme.JetDictionaryTheme
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterScreen(onBack: () -> Unit) {
+fun RegisterScreen(onBack: () -> Unit, registerViewModel: RegisterViewModel) {
     val emailState = remember { EmailState() }
     val passwordState = remember { PasswordState() }
     val confirmPasswordState = remember { ConfirmPasswordState(passwordState = passwordState) }
+    val uiState by registerViewModel.uiState.collectAsState()
+    val showDialog = uiState.isError != null
+    val keyboardController = LocalSoftwareKeyboardController.current
+    if (showDialog) {
+        ShowAlertDialog(
+            onDismiss = { registerViewModel.hideDialog() },
+            message = uiState.isError?.message ?: "Unknown error"
+        )
+    }
+    LoadingScreen(isLoading = uiState.isShowLoading) {
+        Scaffold(topBar = {
+            CustomToolbar(title = stringResource(id = R.string.sign_up), onBackPressed = {
+                onBack()
+            })
+        }, content = {
+            LazyColumn(
+                modifier = Modifier
+                    .supportWideScreen()
+                    .fillMaxHeight()
+                    .wrapContentHeight(align = Alignment.CenterVertically)
+            ) {
+                item {
+                    RegisterContent(
+                        onRegisterSubmitted = { email, password ->
+                            keyboardController?.hide()
+                            registerViewModel.register(email, password)
+                        },
+                        emailState = emailState,
+                        passwordState = passwordState,
+                        confirmPasswordState = confirmPasswordState
+                    )
 
-    Scaffold(topBar = {
-        CustomToolbar(title = stringResource(id = R.string.sign_up), onBackPressed = {
-            onBack()
-        })
-    }, content = {
-        LazyColumn(
-            modifier = Modifier
-                .supportWideScreen()
-                .fillMaxHeight()
-                .wrapContentHeight(align = Alignment.CenterVertically)
-        ) {
-            item {
-                RegisterContent(
-                    onRegisterSubmitted = { email, password -> },
-                    emailState = emailState,
-                    passwordState = passwordState,
-                    confirmPasswordState = confirmPasswordState
-                )
-
+                }
             }
-        }
-    })
+        })
+    }
 }
 
 
@@ -108,6 +124,9 @@ fun RegisterContent(
 @Composable
 fun RegisterPreview() {
     JetDictionaryTheme {
-        RegisterScreen(onBack = {})
+        RegisterScreen(
+            onBack = {},
+            registerViewModel = hiltViewModel()
+        )
     }
 }

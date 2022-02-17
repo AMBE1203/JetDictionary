@@ -38,29 +38,24 @@ class LoginViewModel @Inject constructor(
         navigator.navigate(NavigationActions.LoginScreen.toRegisterScreen())
     }
 
-    fun login(email: String?, password: String?) {
-        when (email.isNullOrEmpty() || password.isNullOrEmpty()) {
-            false -> viewModelScope.launch {
-                getViewStateFlowForNetworkCall {
-                    loginUseCase.execute(
-                        LoginParam(
-                            email,
-                            password
-                        )
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            getViewStateFlowForNetworkCall {
+                loginUseCase.execute(
+                    LoginParam(
+                        email,
+                        password
                     )
-                }.collect { result ->
-                    _uiState.update { state ->
-                        when (result) {
-                            is BaseViewState.Loading -> state.copy(isShowLoading = result.isLoading)
-                            is BaseViewState.RenderFailure -> state.copy(isError = result.throwable)
-                            is BaseViewState.RenderSuccess -> state.copy(isSuccess = result.output)
-                        }
+                )
+            }.collect { result ->
+                _uiState.update { state ->
+                    when (result) {
+                        is BaseViewState.Loading -> state.copy(isShowLoading = result.isLoading)
+                        is BaseViewState.RenderFailure -> state.copy(isError = result.throwable)
+                        is BaseViewState.RenderSuccess -> state.copy(isSuccess = result.output)
                     }
-
                 }
-            }
-            true -> _uiState.update {
-                it.copy(isShowLoading = false, isError = null, isSuccess = null)
+
             }
         }
     }

@@ -4,11 +4,14 @@ import android.content.Context
 import com.example.jetdictionary.core.Constants.BASE_URL
 import com.example.jetdictionary.core.NetworkHelper
 import com.example.jetdictionary.data.repository.LoginRepositoryImpl
+import com.example.jetdictionary.data.repository.RegisterRepositoryImpl
 import com.example.jetdictionary.data.source.local.AppDatabase
 import com.example.jetdictionary.data.source.local.ILocalSource
 import com.example.jetdictionary.data.source.remote.IRemoteApi
 import com.example.jetdictionary.domain.repository.ILoginRepository
+import com.example.jetdictionary.domain.repository.IRegisterRepository
 import com.example.jetdictionary.domain.usecase.LoginUseCase
+import com.example.jetdictionary.domain.usecase.RegisterUseCase
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -104,7 +107,7 @@ class NetworkModule {
     // repository
     @Provides
     @Singleton
-    fun providerSignInRepository(
+    fun providerLoginRepository(
         iRemoteApi: IRemoteApi,
         appDatabase: AppDatabase,
         networkHelper: NetworkHelper
@@ -112,11 +115,23 @@ class NetworkModule {
         return LoginRepositoryImpl(iRemoteApi, appDatabase, networkHelper)
     }
 
-
+    @Provides
+    @Singleton
+    fun providerRegisterRepository(
+        iRemoteApi: IRemoteApi,
+        networkHelper: NetworkHelper
+    ): IRegisterRepository {
+        return RegisterRepositoryImpl(iRemoteApi, networkHelper)
+    }
     // use-case
     @Provides
     @Singleton
     fun providerLoginUseCase(repository: ILoginRepository): LoginUseCase =
         LoginUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun providerRegisterUseCase(repository: IRegisterRepository): RegisterUseCase =
+        RegisterUseCase(repository)
 
 }

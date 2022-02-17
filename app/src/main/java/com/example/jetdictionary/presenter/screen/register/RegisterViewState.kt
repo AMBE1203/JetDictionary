@@ -1,4 +1,9 @@
 package com.example.jetdictionary.presenter.screen.register
 
-class RegisterViewState {
-}
+import com.example.jetdictionary.domain.model.RegisterResponse
+
+data class RegisterViewState(
+    val isShowLoading: Boolean = false,
+    val isError: Throwable?,
+    val isSuccess: RegisterResponse?
+)
