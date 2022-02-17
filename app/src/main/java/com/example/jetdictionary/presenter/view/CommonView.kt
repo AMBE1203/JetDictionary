@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -22,11 +23,41 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.jetdictionary.R
 import com.example.jetdictionary.presenter.base.TextFieldState
 import com.example.jetdictionary.presenter.screen.login.EmailState
 import com.example.jetdictionary.ui.theme.snackbarAction
+
+@Composable
+fun CustomToolbar(title: String, onBackPressed: () -> Unit) {
+    TopAppBar(
+        title = {
+            Text(
+                text = title,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center)
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBackPressed) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.back)
+                )
+            }
+        },
+        // We need to balance the navigation icon, so we add a spacer.
+        actions = {
+            Spacer(modifier = Modifier.width(68.dp))
+        },
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 0.dp
+    )
+}
 
 @Composable
 fun BackPressHandler(enabled: Boolean = true, onBack: () -> Unit) {

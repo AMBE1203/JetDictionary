@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.jetdictionary.domain.model.LoginResponse
 import com.example.jetdictionary.presenter.screen.login.LoginScreen
+import com.example.jetdictionary.presenter.screen.register.RegisterScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.update
 object NavigationDestinations {
     const val LOGIN_ROUTER = "login"
     const val HOME_ROUTER = "home"
+    const val REGISTER_ROUTER = "register"
 
 }
 
@@ -40,7 +42,8 @@ object NavigationActions {
             someStringArgument: String,
             someParcelableObject: LoginResponse
         ) = object : NavigationAction {
-            override val destination: String = "${NavigationDestinations.HOME_ROUTER}/$someStringArgument"
+            override val destination: String =
+                "${NavigationDestinations.HOME_ROUTER}/$someStringArgument"
             override val parcelableArguments: Map<String, LoginResponse>
                 get() = mapOf("LoginResponse" to someParcelableObject)
             override val navOptions = NavOptions.Builder()
@@ -48,6 +51,11 @@ object NavigationActions {
                 .setLaunchSingleTop(true)
                 .build()
 
+        }
+
+        fun toRegisterScreen() = object : NavigationAction {
+            override val destination: String
+                get() = NavigationDestinations.REGISTER_ROUTER
         }
     }
 }
@@ -101,6 +109,12 @@ fun MainNavHost(
             LoginScreen(
                 loginViewModel = hiltViewModel(),
             )
+        }
+
+        composable(NavigationDestinations.REGISTER_ROUTER) {
+            RegisterScreen(onBack = {
+                navController.navigateUp()
+            })
         }
 
     }

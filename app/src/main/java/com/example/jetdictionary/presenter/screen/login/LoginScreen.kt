@@ -82,6 +82,7 @@ fun LoginScreen(
 
                     TextButton(
                         onClick = {
+                            loginViewModel.navigateToRegister()
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {

@@ -7,6 +7,8 @@ import com.example.jetdictionary.core.getViewStateFlowForNetworkCall
 import com.example.jetdictionary.domain.model.LoginParam
 import com.example.jetdictionary.domain.usecase.LoginUseCase
 import com.example.jetdictionary.presenter.base.BaseViewState
+import com.example.jetdictionary.presenter.navigation.NavigationActions
+import com.example.jetdictionary.presenter.navigation.Navigator
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val _uiState =
@@ -29,6 +32,10 @@ class LoginViewModel @Inject constructor(
                 it.copy(isError = null)
             }
         }
+    }
+
+    fun navigateToRegister(){
+        navigator.navigate(NavigationActions.LoginScreen.toRegisterScreen())
     }
 
     fun login(email: String?, password: String?) {
