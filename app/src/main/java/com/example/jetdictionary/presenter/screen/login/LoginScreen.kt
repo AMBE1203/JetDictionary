@@ -42,56 +42,60 @@ fun LoginScreen(
             message = uiState.isError?.message ?: "Unknown error"
         )
     }
-    LoadingScreen(isLoading = uiState.isShowLoading) {
-        Scaffold(content = {
-            LazyColumn(
-                modifier = Modifier
-                    .supportWideScreen()
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center)
+    if (uiState.isSuccess != null) {
+        loginViewModel.navigateToHome()
+    } else {
+        LoadingScreen(isLoading = uiState.isShowLoading) {
+            Scaffold(content = {
+                LazyColumn(
+                    modifier = Modifier
+                        .supportWideScreen()
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
 
-            ) {
-                item {
+                ) {
+                    item {
 
-                    Text(
-                        text = "Welcome to JetDictionary",
-                        style = MaterialTheme.typography.caption,
+                        Text(
+                            text = "Welcome to JetDictionary",
+                            style = MaterialTheme.typography.caption,
 
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    LoginContent(
-                        onLoginSubmitted = { email, password ->
-                            keyboardController?.hide()
-                            loginViewModel.login(email, password)
-                        },
-                        emailState = emailState,
-                        passwordState = passwordState
-                    )
-                    TextButton(
-                        onClick = {
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(text = stringResource(id = R.string.forgot_password))
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        LoginContent(
+                            onLoginSubmitted = { email, password ->
+                                keyboardController?.hide()
+                                loginViewModel.login(email, password)
+                            },
+                            emailState = emailState,
+                            passwordState = passwordState
+                        )
+                        TextButton(
+                            onClick = {
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(text = stringResource(id = R.string.forgot_password))
+                        }
+
+                        TextButton(
+                            onClick = {
+                                loginViewModel.navigateToRegister()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(text = stringResource(id = R.string.register))
+                        }
+
                     }
-
-                    TextButton(
-                        onClick = {
-                            loginViewModel.navigateToRegister()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(text = stringResource(id = R.string.register))
-                    }
-
                 }
-            }
-        })
+            })
+        }
     }
 
 }

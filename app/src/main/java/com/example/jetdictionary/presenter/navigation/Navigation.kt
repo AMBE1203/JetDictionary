@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.jetdictionary.domain.model.LoginResponse
+import com.example.jetdictionary.presenter.screen.home.HomeScreen
 import com.example.jetdictionary.presenter.screen.login.LoginScreen
 import com.example.jetdictionary.presenter.screen.register.RegisterScreen
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,6 +116,10 @@ fun MainNavHost(
             RegisterScreen(onBack = {
                 navController.navigateUp()
             }, registerViewModel = hiltViewModel())
+        }
+
+        composable(NavigationDestinations.HOME_ROUTER){
+            HomeScreen()
         }
 
     }

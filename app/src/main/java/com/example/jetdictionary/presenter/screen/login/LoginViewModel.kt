@@ -34,8 +34,17 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun navigateToRegister(){
+    fun navigateToRegister() {
         navigator.navigate(NavigationActions.LoginScreen.toRegisterScreen())
+    }
+
+    fun navigateToHome() {
+        navigator.navigate(
+            NavigationActions.LoginScreen.toHomeScreen(
+                someStringArgument = "aaaa",
+                someParcelableObject = _uiState.value.isSuccess!!
+            )
+        )
     }
 
     fun login(email: String, password: String) {

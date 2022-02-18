@@ -31,7 +31,7 @@ import com.example.jetdictionary.presenter.screen.login.EmailState
 import com.example.jetdictionary.ui.theme.snackbarAction
 
 @Composable
-fun CustomToolbar(title: String, onBackPressed: () -> Unit) {
+fun CustomToolbar(title: String, onBackPressed: () -> Unit = {}, showBackButton: Boolean = true) {
     TopAppBar(
         title = {
             Text(
@@ -43,11 +43,13 @@ fun CustomToolbar(title: String, onBackPressed: () -> Unit) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBackPressed) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(id = R.string.back)
-                )
+            if (showBackButton) {
+                IconButton(onClick = onBackPressed) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = stringResource(id = R.string.back)
+                    )
+                }
             }
         },
         // We need to balance the navigation icon, so we add a spacer.
