@@ -11,5 +11,6 @@ data class LoginResponse(
     val access_token: String,
     val username: String,
     @PrimaryKey val id: String,
-    val fullName: String
+    val fullname: String,
+    val avatar: String?
 ): Parcelable

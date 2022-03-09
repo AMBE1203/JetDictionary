@@ -154,7 +154,7 @@ fun TextFieldError(textError: String) {
 
 @Composable
 fun InputEmail(
-    emailState: TextFieldState = remember { EmailState() },
+    emailState: TextFieldState,
     imeAction: ImeAction = ImeAction.Next,
     onImeAction: () -> Unit = {}
 ) {

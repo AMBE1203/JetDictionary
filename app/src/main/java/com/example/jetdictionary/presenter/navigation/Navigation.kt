@@ -1,6 +1,8 @@
 package com.example.jetdictionary.presenter.navigation
 
+import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.jetdictionary.core.fromJson
 import com.example.jetdictionary.domain.model.LoginResponse
 import com.example.jetdictionary.presenter.screen.home.HomeScreen
 import com.example.jetdictionary.presenter.screen.login.LoginScreen
@@ -41,12 +44,13 @@ object NavigationActions {
     object LoginScreen {
         fun toHomeScreen(
             someStringArgument: String,
-            someParcelableObject: LoginResponse
+            loginResponse: LoginResponse
         ) = object : NavigationAction {
+
             override val destination: String =
                 "${NavigationDestinations.HOME_ROUTER}/$someStringArgument"
-            override val parcelableArguments: Map<String, LoginResponse>
-                get() = mapOf("LoginResponse" to someParcelableObject)
+            override val parcelableArguments: Map<String, Parcelable>
+                get() = mapOf("LoginResponse" to loginResponse)
             override val navOptions = NavOptions.Builder()
                 .setPopUpTo(0, true)
                 .setLaunchSingleTop(true)
@@ -95,6 +99,7 @@ fun MainNavHost(
     )
     LaunchedEffect(navigatorState) {
         navigatorState?.let { it ->
+            // currentBackStackEntry?.arguments? == null 08/03/2022
             it.parcelableArguments.forEach { arg ->
                 navController.currentBackStackEntry?.arguments?.putParcelable(arg.key, arg.value)
             }
@@ -118,8 +123,21 @@ fun MainNavHost(
             }, registerViewModel = hiltViewModel())
         }
 
-        composable(NavigationDestinations.HOME_ROUTER){
-            HomeScreen()
+        composable(
+            route = "${NavigationDestinations.HOME_ROUTER}/{someStringArgument}",
+            arguments = listOf(
+                navArgument("someStringArgument") { type = NavType.StringType })
+        ) {
+            val someStringArgument = it.arguments?.getString("someStringArgument")
+            val loginResponse =
+                navController.previousBackStackEntry?.arguments?.getParcelable<LoginResponse>("LoginResponse")
+                    ?: someStringArgument?.fromJson(type = LoginResponse::class.java)
+            Log.e("AMBE1203", someStringArgument.toString())
+            HomeScreen(
+                homeViewModel = hiltViewModel(),
+                someStringArgument = someStringArgument,
+                loginResponse = loginResponse
+            )
         }
 
     }

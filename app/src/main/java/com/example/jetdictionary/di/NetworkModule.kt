@@ -109,10 +109,11 @@ class NetworkModule {
     @Singleton
     fun providerLoginRepository(
         iRemoteApi: IRemoteApi,
+        iLocalSource: ILocalSource,
         appDatabase: AppDatabase,
         networkHelper: NetworkHelper
     ): ILoginRepository {
-        return LoginRepositoryImpl(iRemoteApi, appDatabase, networkHelper)
+        return LoginRepositoryImpl(iRemoteApi, iLocalSource, appDatabase, networkHelper)
     }
 
     @Provides

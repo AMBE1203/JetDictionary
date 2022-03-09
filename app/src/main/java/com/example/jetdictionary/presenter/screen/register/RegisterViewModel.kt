@@ -32,10 +32,10 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    fun register(email: String, password: String) {
+    fun register(email: String, password: String, fullname: String, avatar: String?) {
         viewModelScope.launch {
             getViewStateFlowForNetworkCall {
-                registerUseCase.execute(RegisterParam(username = email, password = password))
+                registerUseCase.execute(RegisterParam(username = email, password = password, fullname = fullname, avatar = avatar ?: ""))
             }.collect { result ->
                 _uiState.update { state ->
                     when (result) {

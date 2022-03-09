@@ -2,18 +2,17 @@ package com.example.jetdictionary.presenter.screen.register
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Button
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -34,6 +33,7 @@ fun RegisterScreen(onBack: () -> Unit, registerViewModel: RegisterViewModel) {
     val emailState = remember { EmailState() }
     val passwordState = remember { PasswordState() }
     val confirmPasswordState = remember { ConfirmPasswordState(passwordState = passwordState) }
+    val fullNameState = remember { FullNameState() }
     val uiState by registerViewModel.uiState.collectAsState()
     val showDialog = uiState.isError != null
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -43,42 +43,48 @@ fun RegisterScreen(onBack: () -> Unit, registerViewModel: RegisterViewModel) {
             message = uiState.isError?.message ?: "Unknown error"
         )
     }
-    LoadingScreen(isLoading = uiState.isShowLoading) {
-        Scaffold(topBar = {
-            CustomToolbar(title = stringResource(id = R.string.sign_up), onBackPressed = {
-                onBack()
-            })
-        }, content = {
-            LazyColumn(
-                modifier = Modifier
-                    .supportWideScreen()
-                    .fillMaxHeight()
-                    .wrapContentHeight(align = Alignment.CenterVertically)
-            ) {
-                item {
-                    RegisterContent(
-                        onRegisterSubmitted = { email, password ->
-                            keyboardController?.hide()
-                            registerViewModel.register(email, password)
-                        },
-                        emailState = emailState,
-                        passwordState = passwordState,
-                        confirmPasswordState = confirmPasswordState
-                    )
+    if (uiState.isSuccess != null) {
+        onBack()
+    } else {
+        LoadingScreen(isLoading = uiState.isShowLoading) {
+            Scaffold(topBar = {
+                CustomToolbar(title = stringResource(id = R.string.sign_up), onBackPressed = {
+                    onBack()
+                })
+            }, content = {
+                LazyColumn(
+                    modifier = Modifier
+                        .supportWideScreen()
+                        .fillMaxHeight()
+                        .wrapContentHeight(align = Alignment.CenterVertically)
+                ) {
+                    item {
+                        RegisterContent(
+                            onRegisterSubmitted = { email, password, fullName, avatar ->
+                                keyboardController?.hide()
+                                registerViewModel.register(email, password, fullName, avatar)
+                            },
+                            emailState = emailState,
+                            passwordState = passwordState,
+                            confirmPasswordState = confirmPasswordState,
+                            fullNameState = fullNameState
+                        )
 
+                    }
                 }
-            }
-        })
+            })
+        }
     }
 }
 
 
 @Composable
 fun RegisterContent(
-    onRegisterSubmitted: (email: String, password: String) -> Unit,
+    onRegisterSubmitted: (email: String, password: String, fullname: String, avatar: String?) -> Unit,
     emailState: TextFieldState,
     passwordState: TextFieldState,
-    confirmPasswordState: TextFieldState
+    confirmPasswordState: TextFieldState,
+    fullNameState: TextFieldState
 ) {
     Column(
         modifier = Modifier
@@ -87,6 +93,10 @@ fun RegisterContent(
     ) {
         val focusRequester = remember { FocusRequester() }
         val focusConfirmRequester = remember { FocusRequester() }
+        InputFullName(
+            fullNameState = fullNameState,
+            onImeAction = { focusRequester.requestFocus() })
+        Spacer(modifier = Modifier.height(16.dp))
 
         InputEmail(emailState = emailState, onImeAction = { focusRequester.requestFocus() })
         Spacer(modifier = Modifier.height(16.dp))
@@ -101,12 +111,26 @@ fun RegisterContent(
             hint = stringResource(id = R.string.confirm_password),
             passwordState = confirmPasswordState,
             modifier = Modifier.focusRequester(focusConfirmRequester),
-            onImeAction = { onRegisterSubmitted(emailState.text, passwordState.text) },
+            onImeAction = {
+                onRegisterSubmitted(
+                    emailState.text,
+                    passwordState.text,
+                    fullNameState.text,
+                    ""
+                )
+            },
             imeAction = ImeAction.Done
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(
-            onClick = { onRegisterSubmitted(emailState.text, passwordState.text) },
+            onClick = {
+                onRegisterSubmitted(
+                    emailState.text,
+                    passwordState.text,
+                    fullNameState.text,
+                    ""
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             enabled = emailState.isValid && passwordState.isValid && confirmPasswordState.isValid
         ) {
@@ -118,6 +142,52 @@ fun RegisterContent(
 
     }
 
+}
+
+@Composable
+fun InputFullName(
+    fullNameState: TextFieldState,
+    imeAction: ImeAction = ImeAction.Next,
+    onImeAction: () -> Unit = {}
+
+) {
+    TextField(
+        value = fullNameState.text,
+        onValueChange = {
+            fullNameState.text = it
+        },
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged { focusState ->
+                fullNameState.onFocusChange(focusState.isFocused)
+                if (focusState.isFocused) {
+                    fullNameState.enableShowErrors()
+                }
+            },
+        textStyle = MaterialTheme.typography.body2,
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                onImeAction()
+            }
+        ),
+        isError = fullNameState.showErrors(),
+        placeholder = {
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                Text(
+                    text = stringResource(id = R.string.full_name),
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        },
+        colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = Color.Transparent
+        )
+    )
+    fullNameState.getError()?.let {
+        TextFieldError(textError = it)
+    }
 }
 
 @Preview

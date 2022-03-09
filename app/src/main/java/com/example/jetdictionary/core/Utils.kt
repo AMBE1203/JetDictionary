@@ -1,6 +1,10 @@
 package com.example.jetdictionary.core
 
+import android.util.Log
+import com.example.jetdictionary.domain.model.BaseResponse
+import com.example.jetdictionary.domain.model.LoginResponse
 import com.example.jetdictionary.presenter.base.BaseViewState
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -8,6 +12,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.retryWhen
 import retrofit2.Response
 import java.io.IOException
+import java.util.*
 
 typealias NetworkAPIInvoke<T> = suspend () -> Response<T>
 
@@ -29,6 +34,7 @@ suspend fun <T> performSafeNetworkApiCall(
         val response = networkApiCall()
         if (response.isSuccessful) {
             response.body()?.let {
+                Log.e("NetworkApiCall", response.body().toString())
                 emit(IOResult.OnSuccess(it))
             }
                 ?: emit(IOResult.OnFailed(Errors.NetworkError(message = "API call successful but empty response body")))
@@ -38,7 +44,8 @@ suspend fun <T> performSafeNetworkApiCall(
             IOResult.OnFailed(
                 Errors.NetworkError(
                     statusCode = response.code(),
-                    message = response.errorBody()?.string() ?: messageInCaseOfError
+                    message = response.errorBody()?.string()
+                        ?.fromJson(type = BaseResponse::class.java)?.message ?: messageInCaseOfError
                 )
             )
         )
@@ -68,3 +75,11 @@ suspend fun <T : Any> getViewStateFlowForNetworkCall(ioOperation: suspend () -> 
         emit(BaseViewState.Loading(false))
 
     }.flowOn(Dispatchers.IO)
+
+fun <A> String.fromJson(type: Class<A>): A {
+    return Gson().fromJson(this, type)
+}
+
+fun <A> A.toJson(): String? {
+    return Gson().toJson(this)
+}

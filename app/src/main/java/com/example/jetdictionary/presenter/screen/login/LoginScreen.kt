@@ -3,10 +3,7 @@ package com.example.jetdictionary.presenter.screen.login
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -29,75 +26,83 @@ import com.example.jetdictionary.ui.theme.JetDictionaryTheme
 fun LoginScreen(
     loginViewModel: LoginViewModel
 ) {
-    val uiState by loginViewModel.uiState.collectAsState()
-    val showDialog = uiState.isError != null
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-
-    val emailState = remember { EmailState() }
-    val passwordState = remember { PasswordState() }
-    if (showDialog) {
-        ShowAlertDialog(
-            onDismiss = { loginViewModel.hideDialog() },
-            message = uiState.isError?.message ?: "Unknown error"
-        )
-    }
-    if (uiState.isSuccess != null) {
-        loginViewModel.navigateToHome()
-    } else {
-        LoadingScreen(isLoading = uiState.isShowLoading) {
-            Scaffold(content = {
-                LazyColumn(
-                    modifier = Modifier
-                        .supportWideScreen()
-                        .fillMaxSize()
-                        .wrapContentSize(Alignment.Center)
-
-                ) {
-                    item {
-
-                        Text(
-                            text = "Welcome to JetDictionary",
-                            style = MaterialTheme.typography.caption,
-
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        LoginContent(
-                            onLoginSubmitted = { email, password ->
-                                keyboardController?.hide()
-                                loginViewModel.login(email, password)
-                            },
-                            emailState = emailState,
-                            passwordState = passwordState
-                        )
-                        TextButton(
-                            onClick = {
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = stringResource(id = R.string.forgot_password))
-                        }
-
-                        TextButton(
-                            onClick = {
-                                loginViewModel.navigateToRegister()
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = stringResource(id = R.string.register))
-                        }
-
-                    }
-                }
-            })
+    if (loginViewModel.isLogged) {
+        LaunchedEffect(Unit) {
+            loginViewModel.navigateToHome()
         }
-    }
+    } else {
+        val uiState by loginViewModel.uiState.collectAsState()
+        val showDialog = uiState.isError != null
+        val keyboardController = LocalSoftwareKeyboardController.current
 
+
+        val emailState = remember { EmailState() }
+        val passwordState = remember { PasswordState() }
+        if (showDialog) {
+            ShowAlertDialog(
+                onDismiss = { loginViewModel.hideDialog() },
+                message = uiState.isError?.message ?: "Unknown error"
+            )
+        }
+        if (uiState.isSuccess != null) {
+            LaunchedEffect(Unit) {
+                loginViewModel.navigateToHome()
+            }
+        } else {
+            LoadingScreen(isLoading = uiState.isShowLoading) {
+                Scaffold(content = {
+                    LazyColumn(
+                        modifier = Modifier
+                            .supportWideScreen()
+                            .fillMaxSize()
+                            .wrapContentSize(Alignment.Center)
+
+                    ) {
+                        item {
+
+                            Text(
+                                text = "Welcome to JetDictionary",
+                                style = MaterialTheme.typography.caption,
+
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentWidth(Alignment.CenterHorizontally),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            LoginContent(
+                                onLoginSubmitted = { email, password ->
+                                    keyboardController?.hide()
+                                    loginViewModel.login(email, password)
+                                },
+                                emailState = emailState,
+                                passwordState = passwordState
+                            )
+                            TextButton(
+                                onClick = {
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = stringResource(id = R.string.forgot_password))
+                            }
+
+                            TextButton(
+                                onClick = {
+                                    loginViewModel.navigateToRegister()
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = stringResource(id = R.string.register))
+                            }
+
+                        }
+                    }
+                })
+            }
+        }
+
+    }
 }
 
 @Composable
