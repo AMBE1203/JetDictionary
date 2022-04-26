@@ -24,15 +24,16 @@ import com.example.jetdictionary.ui.theme.JetDictionaryTheme
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel
+    t: LoginViewModel,
+    onLogin: () -> Unit,
 ) {
-    if (loginViewModel.isLogged) {
+    if (t.isLogged) {
         LaunchedEffect(Unit) {
-            loginViewModel.navigateToHome()
+            t.navigateToHome()
         }
     } else {
-        val uiState by loginViewModel.uiState.collectAsState()
-        val showDialog = uiState.isError != null
+        val uiState by t.state.collectAsState()
+        val showDialog = uiState.containsAnyError()
         val keyboardController = LocalSoftwareKeyboardController.current
 
 
@@ -40,16 +41,16 @@ fun LoginScreen(
         val passwordState = remember { PasswordState() }
         if (showDialog) {
             ShowAlertDialog(
-                onDismiss = { loginViewModel.hideDialog() },
-                message = uiState.isError?.message ?: "Unknown error"
+                onDismiss = { t.hideDialog() },
+                message = uiState.error()?.message ?: "Unknown error"
             )
         }
-        if (uiState.isSuccess != null) {
+        if (uiState.hasContent()) {
             LaunchedEffect(Unit) {
-                loginViewModel.navigateToHome()
+                t.navigateToHome()
             }
         } else {
-            LoadingScreen(isLoading = uiState.isShowLoading) {
+            LoadingScreen(isLoading = uiState.loading()) {
                 Scaffold(content = {
                     LazyColumn(
                         modifier = Modifier
@@ -74,7 +75,9 @@ fun LoginScreen(
                             LoginContent(
                                 onLoginSubmitted = { email, password ->
                                     keyboardController?.hide()
-                                    loginViewModel.login(email, password)
+                                    onLogin()
+                                    t.login(email, password)
+
                                 },
                                 emailState = emailState,
                                 passwordState = passwordState
@@ -89,7 +92,7 @@ fun LoginScreen(
 
                             TextButton(
                                 onClick = {
-                                    loginViewModel.navigateToRegister()
+                                    t.navigateToRegister()
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -145,6 +148,6 @@ fun LoginContent(
 @Composable
 fun LoginPreview() {
     JetDictionaryTheme {
-        LoginScreen(loginViewModel = hiltViewModel())
+        LoginScreen(t = hiltViewModel(), onLogin = {})
     }
 }

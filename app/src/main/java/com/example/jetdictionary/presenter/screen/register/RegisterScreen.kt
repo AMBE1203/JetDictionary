@@ -34,19 +34,19 @@ fun RegisterScreen(onBack: () -> Unit, registerViewModel: RegisterViewModel) {
     val passwordState = remember { PasswordState() }
     val confirmPasswordState = remember { ConfirmPasswordState(passwordState = passwordState) }
     val fullNameState = remember { FullNameState() }
-    val uiState by registerViewModel.uiState.collectAsState()
-    val showDialog = uiState.isError != null
+    val uiState by registerViewModel.state.collectAsState()
+    val showDialog = uiState.containsAnyError()
     val keyboardController = LocalSoftwareKeyboardController.current
     if (showDialog) {
         ShowAlertDialog(
-            onDismiss = { registerViewModel.hideDialog() },
-            message = uiState.isError?.message ?: "Unknown error"
+            onDismiss = { registerViewModel.hideErrorDialog() },
+            message = uiState.error()?.message ?: "Unknown error"
         )
     }
-    if (uiState.isSuccess != null) {
+    if (uiState.hasContent()) {
         onBack()
     } else {
-        LoadingScreen(isLoading = uiState.isShowLoading) {
+        LoadingScreen(isLoading = uiState.loading()) {
             Scaffold(topBar = {
                 CustomToolbar(title = stringResource(id = R.string.sign_up), onBackPressed = {
                     onBack()

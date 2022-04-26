@@ -2,17 +2,13 @@ package com.example.jetdictionary.core
 
 import android.util.Log
 import com.example.jetdictionary.domain.model.BaseResponse
-import com.example.jetdictionary.domain.model.LoginResponse
-import com.example.jetdictionary.presenter.base.BaseViewState
+import com.example.jetdictionary.presenter.base.ViewModelState
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.retryWhen
 import retrofit2.Response
 import java.io.IOException
-import java.util.*
 
 typealias NetworkAPIInvoke<T> = suspend () -> Response<T>
 
@@ -62,17 +58,17 @@ suspend fun <T> performSafeNetworkApiCall(
 }
 
 suspend fun <T : Any> getViewStateFlowForNetworkCall(ioOperation: suspend () -> Flow<IOResult<T>>) =
+
     flow {
-        emit(BaseViewState.Loading(isLoading = true))
+        emit(ViewModelState.LoadingState<T, Throwable>(refreshing = true))
         ioOperation().map {
             when (it) {
-                is IOResult.OnSuccess -> BaseViewState.RenderSuccess(it.data)
-                is IOResult.OnFailed -> BaseViewState.RenderFailure(it.error)
+                is IOResult.OnSuccess -> ViewModelState.LoadedState(content = it.data)
+                is IOResult.OnFailed -> ViewModelState.ErrorState<T, Throwable>(error = it.error)
             }
         }.collect {
             emit(it)
         }
-        emit(BaseViewState.Loading(false))
 
     }.flowOn(Dispatchers.IO)
 
