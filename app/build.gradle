@@ -76,6 +76,11 @@ dependencies {
     implementation "androidx.preference:preference-ktx:1.2.0"
 
 
+    // data store
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+
+
     // kotlinx
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.31"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"

@@ -8,8 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.jetdictionary.R
-import com.example.jetdictionary.domain.model.LoginResponse
-import com.example.jetdictionary.presenter.navigation.BottomNavigation
+import com.example.jetdictionary.core.Constants.THEME_DARK
 import com.example.jetdictionary.presenter.view.CustomToolbar
 import com.example.jetdictionary.presenter.view.LoadingScreen
 import com.example.jetdictionary.ui.theme.JetDictionaryTheme
@@ -36,7 +35,7 @@ fun HomeScreen(
 @Preview
 @Composable
 fun HomePreview() {
-    JetDictionaryTheme {
+    JetDictionaryTheme(savedTheme = THEME_DARK) {
 
         HomeScreen(homeViewModel = hiltViewModel())
 

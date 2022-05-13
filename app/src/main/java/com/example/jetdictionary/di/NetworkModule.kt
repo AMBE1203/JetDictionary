@@ -2,6 +2,7 @@ package com.example.jetdictionary.di
 
 import android.content.Context
 import com.example.jetdictionary.core.Constants.BASE_URL
+import com.example.jetdictionary.core.DataStoreManager
 import com.example.jetdictionary.core.NetworkHelper
 import com.example.jetdictionary.data.repository.LoginRepositoryImpl
 import com.example.jetdictionary.data.repository.RegisterRepositoryImpl
@@ -111,9 +112,10 @@ class NetworkModule {
         iRemoteApi: IRemoteApi,
         iLocalSource: ILocalSource,
         appDatabase: AppDatabase,
-        networkHelper: NetworkHelper
+        networkHelper: NetworkHelper,
+        dataStoreManager: DataStoreManager
     ): ILoginRepository {
-        return LoginRepositoryImpl(iRemoteApi, iLocalSource, appDatabase, networkHelper)
+        return LoginRepositoryImpl(iRemoteApi, iLocalSource, appDatabase, networkHelper, dataStoreManager)
     }
 
     @Provides

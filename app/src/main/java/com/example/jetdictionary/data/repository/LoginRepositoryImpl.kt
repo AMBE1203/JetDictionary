@@ -1,5 +1,6 @@
 package com.example.jetdictionary.data.repository
 
+import com.example.jetdictionary.core.DataStoreManager
 import com.example.jetdictionary.core.IOResult
 import com.example.jetdictionary.core.NetworkHelper
 import com.example.jetdictionary.core.performSafeNetworkApiCall
@@ -20,7 +21,8 @@ class LoginRepositoryImpl @Inject constructor(
     private val iRemoteApi: IRemoteApi,
     private val iLocalSource: ILocalSource,
     private val database: AppDatabase,
-    private val networkHelper: NetworkHelper
+    private val networkHelper: NetworkHelper,
+    private val dataStoreManager: DataStoreManager
 ) : ILoginRepository {
     override suspend fun login(loginParam: LoginParam): Flow<IOResult<BaseResponse<LoginResponse>>> =
         performSafeNetworkApiCall(networkHelper = networkHelper, networkApiCall = {
@@ -28,6 +30,7 @@ class LoginRepositoryImpl @Inject constructor(
         }).onEach {
             if (it is IOResult.OnSuccess) {
                 iLocalSource.saveAccessToken(it.data.data?.access_token ?: "")
+                dataStoreManager.setToken(token = it.data.data?.access_token ?: "")
             }
         }
 

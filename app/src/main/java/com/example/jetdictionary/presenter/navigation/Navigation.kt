@@ -1,11 +1,9 @@
 package com.example.jetdictionary.presenter.navigation
 
 import android.os.Parcelable
+import android.util.Log
 import androidx.annotation.DrawableRes
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,32 +34,33 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 object NavigationDestinations {
-    const val LOGIN_ROUTER = "login"
-    const val HOME_ROUTER = "home"
-    const val REGISTER_ROUTER = "register"
-    const val PROFILE_ROUTER = "profile"
-    const val SETTING_ROUTER = "setting"
-    const val APP_SCAFFOLD_ROUTER = "app_scaffold"
-    const val CHAT_GROUP_ROUTER = "chat_group"
+    const val LOGIN_ROUTE = "login"
+    const val HOME_ROUTE = "home"
+    const val REGISTER_ROUTE = "register"
+    const val PROFILE_ROUTE = "profile"
+    const val SETTING_ROUTE = "setting"
+    const val APP_SCAFFOLD_ROUTE = "app_scaffold"
+    const val CHAT_GROUP_ROUTE = "chat_group"
+
 
 }
 
-sealed class BottomBarScreen(val router: String, val title: String, @DrawableRes val icon: Int) {
+sealed class BottomBarScreen(val route: String, val title: String, @DrawableRes val icon: Int) {
     object HomeScreen : BottomBarScreen(
-        router = NavigationDestinations.HOME_ROUTER,
+        route = NavigationDestinations.HOME_ROUTE,
         title = "Home",
         icon = R.drawable.ic_home
     )
 
     object ProfileScreen :
         BottomBarScreen(
-            router = NavigationDestinations.PROFILE_ROUTER,
+            route = NavigationDestinations.PROFILE_ROUTE,
             title = "Profile",
             icon = R.drawable.ic_chat
         )
 
     object SettingsScreen : BottomBarScreen(
-        router = NavigationDestinations.SETTING_ROUTER,
+        route = NavigationDestinations.SETTING_ROUTE,
         title = "Settings",
         icon = R.drawable.ic_settings
     )
@@ -77,10 +76,10 @@ interface NavigationAction {
 
 object NavigationActions {
     object LoginScreen {
-        fun toHomeScreen() = object : NavigationAction {
+        fun toMainScreen() = object : NavigationAction {
 
             override val destination: String =
-                NavigationDestinations.APP_SCAFFOLD_ROUTER
+                NavigationDestinations.APP_SCAFFOLD_ROUTE
 
             override val navOptions = NavOptions.Builder()
                 .setPopUpTo(0, true)
@@ -91,14 +90,14 @@ object NavigationActions {
 
         fun toRegisterScreen() = object : NavigationAction {
             override val destination: String
-                get() = NavigationDestinations.REGISTER_ROUTER
+                get() = NavigationDestinations.REGISTER_ROUTE
         }
     }
 
-    object HomeScreen{
-        fun toChatGroupScreen() = object  : NavigationAction {
+    object HomeScreen {
+        fun toChatGroupScreen() = object : NavigationAction {
             override val destination: String
-                get() = NavigationDestinations.CHAT_GROUP_ROUTER
+                get() = NavigationDestinations.CHAT_GROUP_ROUTE
         }
     }
 }
@@ -126,11 +125,44 @@ class ComposeCustomNavigator : Navigator {
 
 @Composable
 fun MainNavHost(
-    navController: NavHostController = rememberNavController(),
-    navBarNavController: NavController = rememberNavController(),
     navigator: Navigator
 ) {
 
+
+    val navController = rememberNavController()
+    val navBarNavController = rememberNavController()
+
+
+    NavHost(
+        navController = navController,
+        startDestination = NavigationDestinations.LOGIN_ROUTE,
+    ) {
+        composable(NavigationDestinations.LOGIN_ROUTE) {
+            LoginScreen(
+                loginViewModel = hiltViewModel(),
+                onLogin = {
+//                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(NavigationDestinations.REGISTER_ROUTE) {
+            RegisterScreen(onBack = {
+                navController.navigateUp()
+            }, registerViewModel = hiltViewModel())
+        }
+
+        composable(NavigationDestinations.APP_SCAFFOLD_ROUTE) {
+            AppScaffold(navigator = navigator, navController = navBarNavController)
+        }
+    }
+}
+
+@Composable
+fun BottomBarNavHost(
+    navController: NavController,
+    navigator: Navigator
+) {
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val navigatorState by navigator.navActions.asLifecycleAwareState(
@@ -147,71 +179,60 @@ fun MainNavHost(
         }
     }
 
+
     NavHost(
-        navController = navController,
-        startDestination = NavigationDestinations.LOGIN_ROUTER
+        navController = navController as NavHostController,
+        startDestination = NavigationDestinations.HOME_ROUTE,
     ) {
-        composable(NavigationDestinations.LOGIN_ROUTER) {
-            LoginScreen(
-                t = hiltViewModel(),
-                onLogin = {
-//                    navController.popBackStack()
-                }
+
+        composable(route = NavigationDestinations.HOME_ROUTE) {
+            HomeScreen(
+                homeViewModel = hiltViewModel(),
             )
         }
 
-        composable(NavigationDestinations.REGISTER_ROUTER) {
-            RegisterScreen(onBack = {
-                navController.navigateUp()
-            }, registerViewModel = hiltViewModel())
+        composable(NavigationDestinations.PROFILE_ROUTE) {
+            AddPostScreen()
         }
 
-        composable(NavigationDestinations.APP_SCAFFOLD_ROUTER) {
-            AppScaffold(navController = navBarNavController, navigator = navigator)
+        composable(NavigationDestinations.SETTING_ROUTE) {
+            NotificationScreen()
         }
 
+        composable(NavigationDestinations.CHAT_GROUP_ROUTE) {
+            ChatGroupScreen()
+        }
 
     }
+
+
 }
 
+
 @Composable
-fun BottomBarNavHost(
-    navController: NavHostController,
-    navigator: Navigator
+fun MainNavGraph(
+    startDestination: String = NavigationDestinations.LOGIN_ROUTE, navigator: Navigator
 ) {
 
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     val lifecycleOwner = LocalLifecycleOwner.current
     val navigatorState by navigator.navActions.asLifecycleAwareState(
         lifecycleOwner = lifecycleOwner,
         initialState = null
     )
 
-    NavHost(
-        navController = navController,
-        startDestination = NavigationDestinations.HOME_ROUTER
-    ) {
+    val items = listOf(
+        BottomBarScreen.HomeScreen,
+        BottomBarScreen.ProfileScreen,
+        BottomBarScreen.SettingsScreen,
+    )
 
-        composable(route = NavigationDestinations.HOME_ROUTER) {
-            HomeScreen(
-                homeViewModel = hiltViewModel(),
-            )
-        }
 
-        composable(NavigationDestinations.PROFILE_ROUTER) {
-            AddPostScreen()
-        }
+    LaunchedEffect(navigatorState) {
+        Log.e("AMBE1203", navigatorState?.destination.toString())
 
-        composable(NavigationDestinations.SETTING_ROUTER) {
-            NotificationScreen()
-        }
-
-        composable(NavigationDestinations.CHAT_GROUP_ROUTER){
-            ChatGroupScreen()
-        }
-
-    }
-
-        LaunchedEffect(navigatorState) {
         navigatorState?.let { it ->
             // currentBackStackEntry?.arguments? == null 08/03/2022
             it.parcelableArguments.forEach { arg ->
@@ -219,25 +240,83 @@ fun BottomBarNavHost(
             }
             navController.navigate(it.destination, it.navOptions)
         }
+
     }
+    Scaffold(
+        bottomBar = {
+            items.forEach { item ->
+                if (item.route == currentRoute) {
+                    BottomNavigation(
+                        navController = navController,
+                        items = items,
+                        currentRoute = currentRoute
+                    )
+                }
+
+            }
+
+        },
+        backgroundColor = MaterialTheme.colors.background,
+        content = {
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+            ) {
+                composable(NavigationDestinations.LOGIN_ROUTE) {
+                    LoginScreen(
+                        loginViewModel = hiltViewModel(),
+                        onLogin = {
+//                    navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(NavigationDestinations.REGISTER_ROUTE) {
+                    RegisterScreen(onBack = {
+                        navController.navigateUp()
+                    }, registerViewModel = hiltViewModel())
+                }
+
+                composable(route = NavigationDestinations.HOME_ROUTE) {
+                    HomeScreen(
+                        homeViewModel = hiltViewModel(),
+                    )
+                }
+
+                composable(NavigationDestinations.PROFILE_ROUTE) {
+                    AddPostScreen()
+                }
+
+                composable(NavigationDestinations.SETTING_ROUTE) {
+                    NotificationScreen()
+                }
+
+                composable(NavigationDestinations.CHAT_GROUP_ROUTE) {
+                    ChatGroupScreen()
+                }
+
+//                composable(NavigationDestinations.APP_SCAFFOLD_ROUTE) {
+//                    AppScaffold(navigator = navigator)
+//                }
+            }
+        }
+    )
+
 }
 
 
 @Composable
 fun BottomNavigation(
-    navController: NavController
+    navController: NavController,
+    items: List<BottomBarScreen>,
+    currentRoute: String?
+
 ) {
-    val items = listOf(
-        BottomBarScreen.HomeScreen,
-        BottomBarScreen.ProfileScreen,
-        BottomBarScreen.SettingsScreen,
-    )
+
     BottomNavigation(
         backgroundColor = colorResource(id = R.color.teal_200),
         contentColor = Color.Black
     ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRouter = navBackStackEntry?.destination?.route
         items.forEach { item ->
             BottomNavigationItem(label = {
                 Text(text = item.title, fontSize = 9.sp)
@@ -251,16 +330,22 @@ fun BottomNavigation(
                 selectedContentColor = Color.Black,
                 unselectedContentColor = Color.Black.copy(0.4f),
                 alwaysShowLabel = true,
-                selected = currentRouter == item.router,
+                selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.router) {
-                        navController.graph.startDestinationRoute?.let { router ->
-                            popUpTo(router) {
-                                saveState = true
+
+                    if (currentRoute == item.route) {
+                        return@BottomNavigationItem
+                    }
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            navController.graph.startDestinationRoute?.let { router ->
+                                popUpTo(router) {
+                                    saveState = true
+                                }
                             }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 })
         }

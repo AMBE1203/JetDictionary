@@ -26,19 +26,19 @@ class LoginViewModel @Inject constructor(
         navigator.navigate(NavigationActions.LoginScreen.toRegisterScreen())
     }
 
-    fun navigateToHome() {
+    fun navigateToMain() {
         navigator.navigate(
-            NavigationActions.LoginScreen.toHomeScreen()
+            NavigationActions.LoginScreen.toMainScreen()
         )
     }
 
     fun hideDialog() {
-        updateState(currentState().removeError())
+        updateState(currentState.removeError())
     }
 
 
     fun login(email: String, password: String) {
-        asyncFlow {
+        async {
             getViewStateFlowForNetworkCall {
                 loginUseCase.execute(LoginParam(email, password))
             }.collect { result ->

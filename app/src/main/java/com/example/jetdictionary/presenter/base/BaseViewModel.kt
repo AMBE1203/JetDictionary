@@ -20,10 +20,9 @@ abstract class BaseViewModel<C, E> : ViewModel(), DefaultLifecycleObserver {
 
     val state: StateFlow<ViewModelState<C, E>> get() = _state.asStateFlow()
 
-    fun currentState(): ViewModelState<C, E> = _state.value
+    val currentState : ViewModelState<C, E> get() = _state.value
 
     protected fun updateState(newState: ViewModelState<C, E>) {
-
         _state.value = newState
     }
 

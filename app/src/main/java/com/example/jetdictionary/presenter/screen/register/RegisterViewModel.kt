@@ -17,12 +17,12 @@ class RegisterViewModel @Inject constructor(
 
 
     fun hideErrorDialog() {
-        currentState().removeError()
+        currentState.removeError()
     }
 
     fun register(email: String, password: String, fullName: String, avatar: String?) {
 
-        asyncFlow {
+        async {
             getViewStateFlowForNetworkCall {
                 registerUseCase.execute(
                     RegisterParam(

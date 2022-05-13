@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.jetdictionary.R
+import com.example.jetdictionary.core.Constants
 import com.example.jetdictionary.ui.theme.JetDictionaryTheme
 
 @Composable
@@ -38,7 +39,7 @@ fun NotificationScreen() {
 @Composable
 @Preview
 fun NotificationScreenPreview() {
-    JetDictionaryTheme {
+    JetDictionaryTheme (savedTheme = Constants.THEME_DARK){
         NotificationScreen()
     }
 }

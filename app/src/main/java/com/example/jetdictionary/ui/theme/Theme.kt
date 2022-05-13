@@ -7,6 +7,8 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.example.jetdictionary.core.Constants.THEME_DARK
+import com.example.jetdictionary.core.Constants.THEME_LIGHT
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -35,13 +37,24 @@ val Colors.snackbarAction: Color
 
 @Composable
 fun JetDictionaryTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    savedTheme: String,
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+    val colors: Colors
+    when (savedTheme) {
+        THEME_LIGHT -> {
+            colors = LightColorPalette
+        }
+        THEME_DARK -> {
+            colors = DarkColorPalette
+        }
+        else -> {
+            if (isSystemInDarkTheme()) {
+                colors = DarkColorPalette
+            } else {
+                colors = LightColorPalette
+            }
+        }
     }
 
     MaterialTheme(

@@ -1,5 +1,6 @@
 package com.example.jetdictionary.presenter.screen.register
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
@@ -20,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.jetdictionary.R
+import com.example.jetdictionary.core.Constants
 import com.example.jetdictionary.presenter.base.TextFieldState
 import com.example.jetdictionary.presenter.screen.login.ConfirmPasswordState
 import com.example.jetdictionary.presenter.screen.login.EmailState
@@ -193,7 +195,7 @@ fun InputFullName(
 @Preview
 @Composable
 fun RegisterPreview() {
-    JetDictionaryTheme {
+    JetDictionaryTheme(savedTheme = Constants.THEME_DARK) {
         RegisterScreen(
             onBack = {},
             registerViewModel = hiltViewModel()
